@@ -10,15 +10,17 @@ const { createIssuesRouter } = require('./routes/issues')
 const { createDashboardRouter } = require('./routes/dashboard')
 const { createTeamRouter } = require('./routes/team')
 const { createApiTesterRouter } = require('./routes/apiTester')
+const { createCodeReviewRouter } = require('./routes/codeReview')
 
-function createApp(config = getConfig(), apiTesterDependencies = {}) {
+function createApp(config = getConfig(), apiTesterDependencies = {}, codeReviewDependencies = {}) {
   const app = express()
 
   app.disable('x-powered-by')
   app.use(helmet())
   app.use(cors({ origin: config.clientOrigin, credentials: true }))
   app.use((req, res, next) => {
-    const limit = req.path.startsWith('/api/api-tester/') ? '768kb' : '16kb'
+    const limit = req.path.startsWith('/api/api-tester/') ? '768kb'
+      : req.path === '/api/code-review' ? '64kb' : '16kb'
     return express.json({ limit })(req, res, next)
   })
 
@@ -29,6 +31,7 @@ function createApp(config = getConfig(), apiTesterDependencies = {}) {
   app.use('/api/dashboard', createDashboardRouter({ jwtSecret: config.jwtSecret }))
   app.use('/api/team', createTeamRouter({ jwtSecret: config.jwtSecret }))
   app.use('/api/api-tester', createApiTesterRouter({ ...apiTesterDependencies, jwtSecret: config.jwtSecret }))
+  app.use('/api/code-review', createCodeReviewRouter({ ...codeReviewDependencies, jwtSecret: config.jwtSecret }))
 
   app.get('/', (req, res) => {
     res.json({

@@ -10,6 +10,7 @@ import DashboardPage from './DashboardPage.jsx'
 import AuditLogsPage from './AuditLogsPage.jsx'
 import TeamManagementPage from './TeamManagementPage.jsx'
 import ApiTesterPage from './ApiTesterPage.jsx'
+import CodeReviewPage from './CodeReviewPage.jsx'
 
 function Workspace() {
   const { user, loading } = useAuth()
@@ -56,7 +57,7 @@ function Workspace() {
           <a href="#projects" onClick={(event) => navigate(event, 'projects')}>Projects</a>
           <a href="#issues" onClick={(event) => navigate(event, 'issues')}>Issues</a>
           <a href="#api" onClick={(event) => navigate(event, 'api')}>API Tester</a>
-          <a href="#review">AI Code Review</a>
+          <a href="#review" onClick={(event) => navigate(event, 'review')}>Code Review</a>
           <a href="#team" onClick={(event) => navigate(event, 'team')}>Team Management</a>
           {user.role === 'admin' && <a href="#admin-users" onClick={(event) => navigate(event, 'admin-users')}>Admin Users</a>}
           {user.role === 'admin' && <a href="#audit-logs" onClick={(event) => navigate(event, 'audit-logs')}>Audit Logs</a>}
@@ -69,6 +70,7 @@ function Workspace() {
       </aside>
 
       {activePage === 'api' ? <ApiTesterPage />
+        : activePage === 'review' ? <CodeReviewPage />
         : activePage === 'projects' ? <ProjectsPage />
         : activePage === 'issues' ? <IssuesPage />
           : activePage === 'team' ? <TeamManagementPage />

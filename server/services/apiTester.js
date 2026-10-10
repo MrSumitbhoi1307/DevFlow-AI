@@ -130,6 +130,9 @@ function filteredRequestHeaders(headers = {}) {
   if (!Object.keys(filtered).some((name) => name.toLowerCase() === 'accept-encoding')) {
     filtered['accept-encoding'] = 'identity'
   }
+  if (!Object.keys(filtered).some((name) => name.toLowerCase() === 'user-agent')) {
+    filtered['User-Agent'] = 'DevFlow-AI-API-Tester'
+  }
   return filtered
 }
 

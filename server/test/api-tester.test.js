@@ -180,6 +180,54 @@ test('redirect response is returned and never followed to a private address', as
   }
 })
 
+test('real sender adds the default User-Agent when none is supplied', async () => {
+  let receivedUserAgent
+  const localServer = http.createServer((req, res) => {
+    receivedUserAgent = req.headers['user-agent']
+    res.end('ok')
+  })
+  await new Promise((resolve) => localServer.listen(0, '127.0.0.1', resolve))
+  try {
+    const { port } = localServer.address()
+    const validator = async (value) => ({
+      url: new URL(value),
+      addresses: [{ address: '127.0.0.1', family: 4 }],
+    })
+    const app = makeApp({ validator, sender: sendHttpRequest })
+    const response = await send(app, { method: 'GET', url: `http://example.invalid:${port}/user-agent` })
+    assert.equal(response.status, 200)
+    assert.equal(receivedUserAgent, 'DevFlow-AI-API-Tester')
+  } finally {
+    await new Promise((resolve, reject) => localServer.close((error) => error ? reject(error) : resolve()))
+  }
+})
+
+test('real sender preserves a user-supplied User-Agent', async () => {
+  let receivedUserAgent
+  const localServer = http.createServer((req, res) => {
+    receivedUserAgent = req.headers['user-agent']
+    res.end('ok')
+  })
+  await new Promise((resolve) => localServer.listen(0, '127.0.0.1', resolve))
+  try {
+    const { port } = localServer.address()
+    const validator = async (value) => ({
+      url: new URL(value),
+      addresses: [{ address: '127.0.0.1', family: 4 }],
+    })
+    const app = makeApp({ validator, sender: sendHttpRequest })
+    const response = await send(app, {
+      method: 'GET',
+      url: `http://example.invalid:${port}/user-agent`,
+      headers: { 'uSeR-aGeNt': 'Custom-Agent/2.0' },
+    })
+    assert.equal(response.status, 200)
+    assert.equal(receivedUserAgent, 'Custom-Agent/2.0')
+  } finally {
+    await new Promise((resolve, reject) => localServer.close((error) => error ? reject(error) : resolve()))
+  }
+})
+
 test('saved requests require authentication and validate input', async () => {
   const app = makeApp()
   assert.equal((await request(app).get('/api/api-tester/saved')).status, 401)

@@ -12,6 +12,7 @@ import AuditLogsPage from './AuditLogsPage.jsx'
 import TeamManagementPage from './TeamManagementPage.jsx'
 import ApiTesterPage from './ApiTesterPage.jsx'
 import CodeReviewPage from './CodeReviewPage.jsx'
+import ProfilePage from './ProfilePage.jsx'
 
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
@@ -22,6 +23,7 @@ const PAGE_TITLES = {
   review: 'Code Review',
   'admin-users': 'Admin Users',
   'audit-logs': 'Audit Logs',
+  profile: 'Profile',
 }
 
 function NavIcon({ name }) {
@@ -34,6 +36,7 @@ function NavIcon({ name }) {
     review: <><path d="m12 3 2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z" /><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></>,
     admin: <><path d="M12 3 20 6v5c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6z" /><path d="m9 12 2 2 4-4" /></>,
     audit: <><path d="M5 4h14v17H5z" /><path d="M8 8h8M8 12h8M8 16h5" /></>,
+    profile: <><circle cx="12" cy="8" r="3.5" /><path d="M4.5 21v-1.5a7.5 7.5 0 0 1 15 0V21z" /></>,
     logout: <><path d="M10 17l5-5-5-5M15 12H3" /><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></>,
   }
   return <svg aria-hidden="true" viewBox="0 0 24 24">{icons[name]}</svg>
@@ -88,6 +91,7 @@ function Workspace() {
           <a href="#team" aria-current={activePage === 'team' ? 'page' : undefined} onClick={(event) => navigate(event, 'team')}><NavIcon name="team" />Team</a>
           <a href="#api" aria-current={activePage === 'api' ? 'page' : undefined} onClick={(event) => navigate(event, 'api')}><NavIcon name="api" />API Tester</a>
           <a href="#review" aria-current={activePage === 'review' ? 'page' : undefined} onClick={(event) => navigate(event, 'review')}><NavIcon name="review" />Code Review</a>
+          <a href="#profile" aria-current={activePage === 'profile' ? 'page' : undefined} onClick={(event) => navigate(event, 'profile')}><NavIcon name="profile" />Profile</a>
           {isAdmin && <>
             <p className="sidebar-group-label">ADMIN</p>
             <a href="#admin-users" aria-current={activePage === 'admin-users' ? 'page' : undefined} onClick={(event) => navigate(event, 'admin-users')}><NavIcon name="admin" />Admin Users</a>
@@ -106,10 +110,10 @@ function Workspace() {
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
           <span className="workspace-page-title">{PAGE_TITLES[activePage] || 'Dashboard'}</span>
-          <div className="workspace-user">
+          <a className="workspace-user workspace-user-link" href="#profile" aria-label="Profile" onClick={(event) => navigate(event, 'profile')}>
             <span className="workspace-avatar" aria-hidden="true">{initialsFor(user.name)}</span>
             <span className="workspace-user-text"><strong>{user.name}</strong><small>{isAdmin ? 'Admin' : 'Developer'}</small></span>
-          </div>
+          </a>
         </header>
         <div className="workspace-content">
           {activePage === 'api' ? <ApiTesterPage />
@@ -118,7 +122,8 @@ function Workspace() {
                 : activePage === 'issues' ? <IssuesPage />
                   : activePage === 'team' ? <TeamManagementPage />
                     : activePage === 'admin-users' && isAdmin ? <AdminUsersPage />
-                      : activePage === 'audit-logs' && isAdmin ? <AuditLogsPage />
+                    : activePage === 'audit-logs' && isAdmin ? <AuditLogsPage />
+                      : activePage === 'profile' ? <ProfilePage />
                         : <DashboardPage />}
         </div>
       </div>

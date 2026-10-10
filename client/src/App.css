@@ -152,6 +152,11 @@
   gap: 11px;
 }
 
+.workspace-user-link {
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+
 .workspace-avatar {
   display: grid;
   width: 40px;

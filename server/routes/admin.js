@@ -2,10 +2,13 @@ const express = require('express')
 const mongoose = require('mongoose')
 const { z } = require('zod')
 const User = require('../models/user')
+const AuditLog = require('../models/auditLog')
 const { createAuthenticate, requireRole } = require('../middleware/authenticate')
+const { writeAuditLog, safeMetadata } = require('../services/auditLog')
 
 const roleSchema = z.object({ role: z.enum(['admin', 'developer']) }).strict()
 const statusSchema = z.object({ status: z.enum(['active', 'inactive']) }).strict()
+const auditLogQuerySchema = z.object({ action: z.string().trim().min(1).max(80).optional() }).strict()
 
 function sendInvalid(res, parsed, message) {
   return res.status(400).json({
@@ -47,7 +50,7 @@ function publicUser(user) {
     }
 }
 
-function createAdminRouter({ jwtSecret, userModel = User }) {
+function createAdminRouter({ jwtSecret, userModel = User, auditLogModel = AuditLog }) {
   const router = express.Router()
   router.use(createAuthenticate({ jwtSecret, userModel }))
   router.use(requireRole('admin'))
@@ -59,6 +62,32 @@ function createAdminRouter({ jwtSecret, userModel = User }) {
         .limit(100)
         .lean()
       return res.json({ success: true, users })
+    } catch (error) {
+      return next(error)
+    }
+  })
+
+  router.get('/audit-logs', async (req, res, next) => {
+    const parsed = auditLogQuerySchema.safeParse(req.query)
+    if (!parsed.success) return sendInvalid(res, parsed, 'Invalid audit log filter')
+    try {
+      const filter = parsed.data.action ? { action: parsed.data.action } : {}
+      const entries = await auditLogModel.find(filter)
+        .select('actor action targetType targetId metadata createdAt')
+        .populate('actor', 'name')
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(100)
+        .lean()
+      const auditLogs = entries.map((entry) => ({
+        id: String(entry._id),
+        actor: entry.actor ? { name: entry.actor.name } : null,
+        action: entry.action,
+        targetType: entry.targetType,
+        targetId: entry.targetId,
+        metadata: safeMetadata(entry.metadata),
+        createdAt: entry.createdAt,
+      }))
+      return res.json({ success: true, auditLogs })
     } catch (error) {
       return next(error)
     }
@@ -84,6 +113,13 @@ function createAdminRouter({ jwtSecret, userModel = User }) {
         { role: parsed.data.role },
         { new: true, runValidators: true },
       )
+      await writeAuditLog({
+        actor: req.user._id,
+        action: 'user.role_changed',
+        targetType: 'user',
+        targetId: user.id,
+        metadata: { fromRole: user.role, toRole: parsed.data.role },
+      }, { auditLogModel })
       return res.json({ success: true, user: publicUser(updated) })
     } catch (error) {
       return next(error)
@@ -110,6 +146,13 @@ function createAdminRouter({ jwtSecret, userModel = User }) {
         { status: parsed.data.status },
         { new: true, runValidators: true },
       )
+      await writeAuditLog({
+        actor: req.user._id,
+        action: 'user.status_changed',
+        targetType: 'user',
+        targetId: user.id,
+        metadata: { fromStatus: user.status, toStatus: parsed.data.status },
+      }, { auditLogModel })
       return res.json({ success: true, user: publicUser(updated) })
     } catch (error) {
       return next(error)
@@ -125,6 +168,13 @@ function createAdminRouter({ jwtSecret, userModel = User }) {
       }
 
       await userModel.deleteOne({ _id: user._id })
+      await writeAuditLog({
+        actor: req.user._id,
+        action: 'user.removed',
+        targetType: 'user',
+        targetId: user.id,
+        metadata: { role: user.role, status: user.status },
+      }, { auditLogModel })
       return res.json({ success: true, userId: String(user._id) })
     } catch (error) {
       return next(error)

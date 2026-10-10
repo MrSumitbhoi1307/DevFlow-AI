@@ -1,6 +1,8 @@
 const { z } = require('zod')
 const User = require('../models/user')
 const AdminBootstrap = require('../models/adminBootstrap')
+const AuditLog = require('../models/auditLog')
+const { writeAuditLog } = require('./auditLog')
 
 const credentialsSchema = z.object({
   MONGODB_URI: z.string().trim().min(1),
@@ -14,7 +16,11 @@ const credentialsSchema = z.object({
     .regex(/[0-9]/),
 })
 
-async function bootstrapInitialAdmin(env = process.env, { userModel = User, lockModel = AdminBootstrap } = {}) {
+async function bootstrapInitialAdmin(env = process.env, {
+  userModel = User,
+  lockModel = AdminBootstrap,
+  auditLogModel = AuditLog,
+} = {}) {
   const parsed = credentialsSchema.safeParse(env)
   if (!parsed.success) {
     throw new Error('Set a valid MongoDB URI and strong initial Admin name, email, and password in the local environment')
@@ -43,6 +49,13 @@ async function bootstrapInitialAdmin(env = process.env, { userModel = User, lock
       status: 'active',
     })
     await lockModel.updateOne({ _id: 'initial-admin' }, { $set: { state: 'complete' } })
+    await writeAuditLog({
+      actor: user._id,
+      action: 'admin.bootstrap_completed',
+      targetType: 'user',
+      targetId: user.id,
+      metadata: { role: 'admin', status: 'active', bootstrap: true },
+    }, { auditLogModel })
     return { userId: user.id }
   } catch (error) {
     await lockModel.deleteOne({ _id: 'initial-admin' })

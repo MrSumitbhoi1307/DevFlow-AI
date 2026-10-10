@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from './auth/AuthContext.jsx'
 
 function DashboardPage() {
-  const { request, user, logout } = useAuth()
+  const { request, user } = useAuth()
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -26,7 +26,6 @@ function DashboardPage() {
     <main className="main-content">
       <header className="topbar">
         <div><h1>Developer Dashboard</h1><p>Welcome to your development workspace.</p></div>
-        <button type="button" onClick={logout}>Logout</button>
       </header>
       {error && <p role="alert">{error} <button type="button" onClick={loadSummary}>Retry</button></p>}
       {loading ? <p role="status">Loading workspace metrics…</p> : !error && summary && (
@@ -45,7 +44,7 @@ function DashboardPage() {
         <article className="tool-card"><h3>Issue Tracker</h3><p>Create and manage bugs, tasks and priorities.</p></article>
         <article className="tool-card"><h3>API Tester</h3><p>Send requests and inspect HTTP responses.</p></article>
         <article className="tool-card"><h3>Code Review</h3><p>Deterministic rule-based checks; no AI model is called.</p></article>
-        {user.role === 'admin' && <article className="tool-card"><h3>Team Management</h3><p>Planned feature.</p></article>}
+        {user.role === 'admin' && <article className="tool-card"><h3>Team Management</h3><p>View active workspace members and their contributions.</p></article>}
       </section>
     </main>
   )

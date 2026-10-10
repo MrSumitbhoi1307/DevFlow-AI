@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import App from './App.jsx'
 
 function jsonResponse(body, status = 200) {
@@ -31,6 +31,7 @@ describe('client authentication', () => {
       .mockResolvedValueOnce(jsonResponse({ success: true, user: developer }))
 
     render(<App />)
+    fireEvent.click(within(screen.getByRole('navigation', { name: 'Landing navigation' })).getByRole('button', { name: 'Login' }))
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: developer.email } })
     fireEvent.change(screen.getByLabelText(/Password/), { target: { value: 'Password123' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
@@ -50,7 +51,7 @@ describe('client authentication', () => {
       .mockResolvedValueOnce(jsonResponse({ success: true, user: developer }))
 
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: 'Register' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Get Started Free' }))
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: developer.name } })
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: developer.email } })
     fireEvent.change(screen.getByLabelText(/Password/), { target: { value: 'Password123' } })
@@ -69,11 +70,11 @@ describe('client authentication', () => {
     render(<App />)
 
     expect(await screen.findByText(admin.name)).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Team Management' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Team' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Logout' }))
 
     expect(sessionStorage.getItem('devflow.token')).toBeNull()
-    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Build Faster, Code Smarter with DevFlow AI' })).toBeTruthy()
   })
 
   it('hides Admin navigation and tools from a Developer', async () => {
@@ -83,7 +84,7 @@ describe('client authentication', () => {
     render(<App />)
 
     expect(await screen.findByText(developer.name)).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Team Management' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Team' })).toBeTruthy()
     expect(screen.queryByRole('link', { name: 'Admin Users' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'Audit Logs' })).toBeNull()
     expect(screen.queryByText('Manage developer and admin permissions.')).toBeNull()
@@ -107,11 +108,11 @@ describe('client authentication', () => {
     })
 
     render(<App />)
-    fireEvent.click(await screen.findByRole('link', { name: 'Team Management' }))
+    fireEvent.click(await screen.findByRole('link', { name: 'Team' }))
 
     expect(await screen.findByText('Private Developer')).toBeTruthy()
     expect(screen.queryByText(/@/)).toBeNull()
-    expect(screen.getByRole('link', { name: 'Team Management' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Team' })).toBeTruthy()
     expect(screen.queryByRole('link', { name: 'Admin Users' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'Audit Logs' })).toBeNull()
   })
@@ -122,7 +123,7 @@ describe('client authentication', () => {
 
     render(<App />)
 
-    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Build Faster, Code Smarter with DevFlow AI' })).toBeTruthy()
     expect(sessionStorage.getItem('devflow.token')).toBeNull()
     expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api/auth/me', expect.objectContaining({
       headers: expect.objectContaining({ Authorization: 'Bearer expired-token' }),

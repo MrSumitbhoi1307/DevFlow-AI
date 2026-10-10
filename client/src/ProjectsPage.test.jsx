@@ -74,7 +74,7 @@ describe('Projects page inside the authenticated app', () => {
     sessionStorage.clear()
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Build Faster, Code Smarter with DevFlow AI' })).toBeTruthy()
     expect(fetch).not.toHaveBeenCalled()
   })
 })

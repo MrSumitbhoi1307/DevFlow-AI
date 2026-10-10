@@ -32,7 +32,7 @@ describe('client authentication', () => {
 
     render(<App />)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: developer.email } })
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Password123' } })
+    fireEvent.change(screen.getByLabelText(/Password/), { target: { value: 'Password123' } })
     fireEvent.click(screen.getByRole('button', { name: 'Login' }))
 
     expect(await screen.findByText(developer.name)).toBeTruthy()
@@ -50,7 +50,7 @@ describe('client authentication', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Register' }))
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: developer.name } })
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: developer.email } })
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'Password123' } })
+    fireEvent.change(screen.getByLabelText(/Password/), { target: { value: 'Password123' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
 
     expect(await screen.findByText(developer.name)).toBeTruthy()

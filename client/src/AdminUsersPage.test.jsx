@@ -11,6 +11,16 @@ const admin = { id: 'admin-1', name: 'Admin User', email: 'admin@example.com', r
 const developer = { id: 'dev-1', name: 'Dev User', email: 'dev@example.com', role: 'developer', status: 'active' }
 const listedDeveloper = { _id: 'dev-1', name: developer.name, email: developer.email, role: 'developer', status: 'active' }
 
+function mockAdminRequests({ user = admin, users = [listedDeveloper], actionResponse } = {}) {
+  fetch.mockImplementation(async (url, options = {}) => {
+    if (url.endsWith('/api/auth/me')) return jsonResponse({ success: true, user })
+    if (url.endsWith('/api/dashboard/summary')) return jsonResponse({ success: true, summary: { totalProjects: 0, openIssues: 0, teamMembers: 1 } })
+    if (url.endsWith('/api/admin/users') && (!options.method || options.method === 'GET')) return jsonResponse({ success: true, users })
+    if (url.includes('/api/admin/users/') && actionResponse) return actionResponse
+    return jsonResponse({ success: false, error: 'Unexpected request' }, 404)
+  })
+}
+
 describe('Admin Users page', () => {
   beforeEach(() => {
     sessionStorage.clear()
@@ -25,8 +35,7 @@ describe('Admin Users page', () => {
 
   it('shows the user-management page to an Admin', async () => {
     sessionStorage.setItem('devflow.token', 'admin-token')
-    fetch.mockResolvedValueOnce(jsonResponse({ success: true, user: admin }))
-      .mockResolvedValueOnce(jsonResponse({ success: true, users: [listedDeveloper] }))
+    mockAdminRequests()
 
     render(<App />)
     fireEvent.click(await screen.findByRole('link', { name: 'Admin Users' }))
@@ -38,7 +47,7 @@ describe('Admin Users page', () => {
 
   it('does not show or allow a Developer to reach the Admin Users page', async () => {
     sessionStorage.setItem('devflow.token', 'developer-token')
-    fetch.mockResolvedValueOnce(jsonResponse({ success: true, user: developer }))
+    mockAdminRequests({ user: developer, users: [] })
 
     render(<App />)
     expect(await screen.findByText(developer.name)).toBeTruthy()
@@ -51,26 +60,27 @@ describe('Admin Users page', () => {
 
   it('calls the role API when an Admin promotes a Developer', async () => {
     sessionStorage.setItem('devflow.token', 'admin-token')
-    fetch.mockResolvedValueOnce(jsonResponse({ success: true, user: admin }))
-      .mockResolvedValueOnce(jsonResponse({ success: true, users: [listedDeveloper] }))
-      .mockResolvedValueOnce(jsonResponse({ success: true, user: { ...listedDeveloper, role: 'admin' } }))
+    mockAdminRequests({ actionResponse: jsonResponse({ success: true, user: { ...listedDeveloper, role: 'admin' } }) })
 
     render(<App />)
     fireEvent.click(await screen.findByRole('link', { name: 'Admin Users' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Promote' }))
 
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3))
-    expect(fetch.mock.calls[2][0]).toBe('http://localhost:5000/api/admin/users/dev-1/role')
-    expect(fetch.mock.calls[2][1].method).toBe('PATCH')
-    expect(JSON.parse(fetch.mock.calls[2][1].body)).toEqual({ role: 'admin' })
-    expect(fetch.mock.calls[2][1].headers.Authorization).toBe('Bearer admin-token')
+    await waitFor(() => {
+      const roleCall = fetch.mock.calls.find(([url]) => url === 'http://localhost:5000/api/admin/users/dev-1/role')
+      expect(roleCall).toBeTruthy()
+      expect(roleCall[1].method).toBe('PATCH')
+      expect(JSON.parse(roleCall[1].body)).toEqual({ role: 'admin' })
+      expect(roleCall[1].headers.Authorization).toBe('Bearer admin-token')
+    })
   })
 
   it('shows Admin protection errors returned by the server', async () => {
     sessionStorage.setItem('devflow.token', 'admin-token')
-    fetch.mockResolvedValueOnce(jsonResponse({ success: true, user: admin }))
-      .mockResolvedValueOnce(jsonResponse({ success: true, users: [{ ...listedDeveloper, role: 'admin' }] }))
-      .mockResolvedValueOnce(jsonResponse({ success: false, error: 'Cannot remove the last active Admin' }, 409))
+    mockAdminRequests({
+      users: [{ ...listedDeveloper, role: 'admin' }],
+      actionResponse: jsonResponse({ success: false, error: 'Cannot remove the last active Admin' }, 409),
+    })
     vi.stubGlobal('confirm', vi.fn(() => true))
 
     render(<App />)

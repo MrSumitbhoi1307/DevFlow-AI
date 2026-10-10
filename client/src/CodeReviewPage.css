@@ -1,0 +1,239 @@
+.code-review-page {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: 36px 42px 48px;
+  color: #172033;
+}
+
+.code-review-heading,
+.code-review-results-heading,
+.code-review-history-heading,
+.code-review-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.code-review-heading h1,
+.code-review-results h2,
+.code-review-history h2 {
+  margin: 4px 0 8px;
+}
+
+.code-review-heading p:not(.eyebrow) {
+  color: #667085;
+}
+
+.code-review-label,
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #eef2ff;
+  color: #3845a3;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.code-review-form,
+.code-review-results,
+.code-review-history {
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid #e5e9f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(25 40 70 / 5%);
+}
+
+.code-review-form label {
+  display: grid;
+  gap: 8px;
+  color: #384152;
+  font-weight: 650;
+}
+
+.code-review-fields {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(220px, 1.3fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.code-review-fields input,
+.code-review-fields select,
+.code-review-source {
+  width: 100%;
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #172033;
+}
+
+.code-review-source {
+  display: block;
+  margin-top: 8px;
+  min-height: 320px;
+  resize: vertical;
+  background: #101828;
+  color: #f2f4f7;
+  font: 0.9rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+  tab-size: 2;
+}
+
+.code-review-form-footer {
+  margin-top: 14px;
+}
+
+.code-review-form-footer small,
+.code-review-history li small {
+  color: #667085;
+}
+
+.code-review-form button,
+.code-review-refresh,
+.code-review-delete {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 15px;
+  background: #2859c5;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.code-review-form button:disabled,
+.code-review-refresh:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.code-review-error {
+  margin: 20px 0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #fff0f0;
+  color: #a42121;
+}
+
+.code-review-score {
+  color: #2859c5;
+  font-size: 1.1rem;
+}
+
+.code-review-severity-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.severity-error {
+  background: #fee4e2;
+  color: #912018;
+}
+
+.severity-warning {
+  background: #fff1cc;
+  color: #854d0e;
+}
+
+.severity-info {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.code-review-findings {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.code-review-findings li {
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.code-review-finding-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.code-review-finding-title > span:last-child {
+  margin-left: auto;
+  color: #667085;
+}
+
+.code-review-findings p {
+  margin: 10px 0 5px;
+}
+
+.code-review-findings small {
+  color: #667085;
+}
+
+.code-review-history-heading {
+  margin-bottom: 12px;
+}
+
+.code-review-refresh {
+  padding: 8px 12px;
+  background: #eef2f8;
+  color: #344054;
+}
+
+.code-review-history ul {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.code-review-history li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #edf0f4;
+  padding: 12px 0;
+}
+
+.code-review-history li > div {
+  display: grid;
+  gap: 4px;
+}
+
+.code-review-delete {
+  background: #fff0f0;
+  color: #a42121;
+}
+
+@media (max-width: 720px) {
+  .code-review-page {
+    padding: 26px 18px 36px;
+  }
+
+  .code-review-heading,
+  .code-review-form-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .code-review-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .code-review-history li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

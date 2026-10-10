@@ -1,7 +1,18 @@
 
 import './App.css'
+import { useState } from 'react'
+import ProjectsPage from './ProjectsPage.jsx'
+import './ProjectsPage.css'
 
 function App() {
+  const [activePage, setActivePage] = useState('dashboard')
+
+  function navigate(event, page) {
+    event.preventDefault()
+    setActivePage(page)
+    window.history.replaceState(null, '', `#${page}`)
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -9,8 +20,8 @@ function App() {
         <p>DEVELOPER WORKSPACE</p>
 
         <nav>
-          <a href="#dashboard">Dashboard</a>
-          <a href="#projects">Projects</a>
+          <a href="#dashboard" onClick={(event) => navigate(event, 'dashboard')}>Dashboard</a>
+          <a href="#projects" onClick={(event) => navigate(event, 'projects')}>Projects</a>
           <a href="#issues">Issues</a>
           <a href="#api">API Tester</a>
           <a href="#review">AI Code Review</a>
@@ -23,6 +34,7 @@ function App() {
         </div>
       </aside>
 
+      {activePage === 'projects' ? <ProjectsPage /> : (
       <main className="main-content">
         <header className="topbar">
           <div>
@@ -84,6 +96,7 @@ function App() {
           </article>
         </section>
       </main>
+      )}
     </div>
   )
 }

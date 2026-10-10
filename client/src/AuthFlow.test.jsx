@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import App from './App.jsx'
 
 function jsonResponse(body, status = 200) {
@@ -39,7 +39,10 @@ describe('client authentication', () => {
     expect(sessionStorage.getItem('devflow.token')).toBe('login-token')
     expect(fetch.mock.calls[0][0]).toBe('http://localhost:5000/api/auth/login')
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ email: developer.email, password: 'Password123' })
-    expect(fetch.mock.calls[1][1].headers.Authorization).toBe('Bearer login-token')
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:5000/api/dashboard/summary',
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer login-token' }) }),
+    ))
   })
 
   it('registers with name, email and password and does not send a role', async () => {
@@ -80,8 +83,37 @@ describe('client authentication', () => {
     render(<App />)
 
     expect(await screen.findByText(developer.name)).toBeTruthy()
-    expect(screen.queryByRole('link', { name: 'Team Management' })).toBeNull()
+    expect(screen.getByRole('link', { name: 'Team Management' })).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Admin Users' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Audit Logs' })).toBeNull()
     expect(screen.queryByText('Manage developer and admin permissions.')).toBeNull()
+  })
+
+  it('lets a Developer open Team Management without exposing emails', async () => {
+    sessionStorage.setItem('devflow.token', 'developer-token')
+    fetch.mockImplementation(async (url) => {
+      const path = new URL(url).pathname
+      if (path === '/api/auth/me') return jsonResponse({ success: true, user: developer })
+      if (path === '/api/dashboard/summary') {
+        return jsonResponse({ success: true, summary: { totalProjects: 1, openIssues: 2 } })
+      }
+      if (path === '/api/team') {
+        return jsonResponse({ success: true, members: [{
+          _id: 'dev-2', name: 'Private Developer', role: 'developer',
+          projectsOwnedCount: 1, issuesReportedCount: 2,
+        }] })
+      }
+      throw new Error(`Unexpected request: ${path}`)
+    })
+
+    render(<App />)
+    fireEvent.click(await screen.findByRole('link', { name: 'Team Management' }))
+
+    expect(await screen.findByText('Private Developer')).toBeTruthy()
+    expect(screen.queryByText(/@/)).toBeNull()
+    expect(screen.getByRole('link', { name: 'Team Management' })).toBeTruthy()
+    expect(screen.queryByRole('link', { name: 'Admin Users' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Audit Logs' })).toBeNull()
   })
 
   it('clears an expired session and returns to the Login form after a 401', async () => {

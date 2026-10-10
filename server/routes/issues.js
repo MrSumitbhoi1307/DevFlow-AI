@@ -4,7 +4,9 @@ const { z } = require('zod')
 const Issue = require('../models/issue')
 const Project = require('../models/project')
 const User = require('../models/user')
+const AuditLog = require('../models/auditLog')
 const { createAuthenticate } = require('../middleware/authenticate')
+const { writeAuditLog } = require('../services/auditLog')
 
 const objectId = z.string().regex(/^[a-f\d]{24}$/i)
 const createIssueSchema = z.object({
@@ -73,7 +75,7 @@ function canManageIssue(user, issue) {
   return user.role === 'admin' || String(issue.reporter) === String(user._id)
 }
 
-function createIssuesRouter({ jwtSecret, issueModel = Issue, projectModel = Project, userModel = User }) {
+function createIssuesRouter({ jwtSecret, issueModel = Issue, projectModel = Project, userModel = User, auditLogModel = AuditLog }) {
   const router = express.Router()
   router.use(createAuthenticate({ jwtSecret, userModel }))
 
@@ -123,6 +125,13 @@ function createIssuesRouter({ jwtSecret, issueModel = Issue, projectModel = Proj
         reporter: req.user._id,
         assignee: assignee?._id || null,
       })
+      await writeAuditLog({
+        actor: req.user._id,
+        action: 'issue.created',
+        targetType: 'issue',
+        targetId: issue.id,
+        metadata: { projectId: String(project._id), status: issue.status, priority: issue.priority },
+      }, { auditLogModel })
       const populated = await issuePopulation(issueModel.findById(issue._id)).lean()
       return res.status(201).json({ success: true, issue: populated })
     } catch (error) {
@@ -169,6 +178,13 @@ function createIssuesRouter({ jwtSecret, issueModel = Issue, projectModel = Proj
       }
 
       await issueModel.deleteOne({ _id: issue._id })
+      await writeAuditLog({
+        actor: req.user._id,
+        action: 'issue.deleted',
+        targetType: 'issue',
+        targetId: issue.id,
+        metadata: { projectId: String(issue.project), status: issue.status, priority: issue.priority },
+      }, { auditLogModel })
       return res.json({ success: true, issueId: String(issue._id) })
     } catch (error) {
       return next(error)

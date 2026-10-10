@@ -8,6 +8,7 @@ const { createAdminRouter } = require('./routes/admin')
 const { createProjectsRouter } = require('./routes/projects')
 const { createIssuesRouter } = require('./routes/issues')
 const { createDashboardRouter } = require('./routes/dashboard')
+const { createTeamRouter } = require('./routes/team')
 
 function createApp(config = getConfig()) {
   const app = express()
@@ -22,6 +23,7 @@ function createApp(config = getConfig()) {
   app.use('/api/projects', createProjectsRouter({ jwtSecret: config.jwtSecret }))
   app.use('/api/issues', createIssuesRouter({ jwtSecret: config.jwtSecret }))
   app.use('/api/dashboard', createDashboardRouter({ jwtSecret: config.jwtSecret }))
+  app.use('/api/team', createTeamRouter({ jwtSecret: config.jwtSecret }))
 
   app.get('/', (req, res) => {
     res.json({

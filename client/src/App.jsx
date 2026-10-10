@@ -7,6 +7,8 @@ import './ProjectsPage.css'
 import AdminUsersPage from './AdminUsersPage.jsx'
 import IssuesPage from './IssuesPage.jsx'
 import DashboardPage from './DashboardPage.jsx'
+import AuditLogsPage from './AuditLogsPage.jsx'
+import TeamManagementPage from './TeamManagementPage.jsx'
 
 function Workspace() {
   const { user, loading } = useAuth()
@@ -54,8 +56,9 @@ function Workspace() {
           <a href="#issues" onClick={(event) => navigate(event, 'issues')}>Issues</a>
           <a href="#api">API Tester</a>
           <a href="#review">AI Code Review</a>
-          {user.role === 'admin' && <a href="#team">Team Management</a>}
+          <a href="#team" onClick={(event) => navigate(event, 'team')}>Team Management</a>
           {user.role === 'admin' && <a href="#admin-users" onClick={(event) => navigate(event, 'admin-users')}>Admin Users</a>}
+          {user.role === 'admin' && <a href="#audit-logs" onClick={(event) => navigate(event, 'audit-logs')}>Audit Logs</a>}
         </nav>
 
         <div className="user-info">
@@ -64,7 +67,12 @@ function Workspace() {
         </div>
       </aside>
 
-      {activePage === 'projects' ? <ProjectsPage /> : activePage === 'issues' ? <IssuesPage /> : activePage === 'admin-users' && user.role === 'admin' ? <AdminUsersPage /> : <DashboardPage />}
+      {activePage === 'projects' ? <ProjectsPage />
+        : activePage === 'issues' ? <IssuesPage />
+          : activePage === 'team' ? <TeamManagementPage />
+            : activePage === 'admin-users' && user.role === 'admin' ? <AdminUsersPage />
+              : activePage === 'audit-logs' && user.role === 'admin' ? <AuditLogsPage />
+                : <DashboardPage />}
     </div>
   )
 }

@@ -43,7 +43,7 @@ function DashboardPage() {
       </section>
       <section className="tools-grid">
         <article className="tool-card"><h3>Issue Tracker</h3><p>Create and manage bugs, tasks and priorities.</p></article>
-        <article className="tool-card"><h3>API Tester</h3><p>Planned feature.</p></article>
+        <article className="tool-card"><h3>API Tester</h3><p>Send requests and inspect HTTP responses.</p></article>
         <article className="tool-card"><h3>AI Code Review</h3><p>Planned feature.</p></article>
         {user.role === 'admin' && <article className="tool-card"><h3>Team Management</h3><p>Planned feature.</p></article>}
       </section>

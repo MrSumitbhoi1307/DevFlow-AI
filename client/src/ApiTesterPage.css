@@ -1,0 +1,116 @@
+.api-tester-page {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px clamp(18px, 4vw, 48px) 48px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.api-tester-heading { margin-bottom: 24px; }
+.api-tester-heading h1 { margin: 4px 0 8px; font-size: clamp(32px, 5vw, 44px); }
+.api-tester-heading p:last-child { color: #64748b; }
+
+.api-tester-form,
+.api-tester-response,
+.api-tester-saved {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.api-tester-form label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.api-tester-form input,
+.api-tester-form select,
+.api-tester-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  background: #fff;
+  font: inherit;
+}
+
+.api-tester-request-line,
+.api-tester-save-line {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.api-tester-request-line > label:first-child { width: 130px; }
+.api-tester-url { flex: 1; }
+.api-tester-save-line > label { flex: 1; }
+
+.api-tester-request-line button,
+.api-tester-save-line button,
+.api-tester-saved-actions button {
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #6d28d9;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.api-tester-request-line button:disabled,
+.api-tester-save-line button:disabled { opacity: 0.6; cursor: wait; }
+.api-tester-form .api-tester-code-input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; }
+.api-tester-secondary { color: #334155 !important; background: #f1f5f9 !important; }
+.api-tester-delete { background: #b91c1c !important; }
+.api-tester-error { color: #b91c1c; }
+.api-tester-response h2,
+.api-tester-saved h2 { margin: 0; }
+.api-tester-response h3 { margin: 4px 0 -8px; font-size: 14px; }
+.api-tester-response pre {
+  max-height: 300px;
+  overflow: auto;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  color: #e2e8f0;
+  background: #0f172a;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.api-tester-response-heading { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.api-tester-response-heading small { margin-left: auto; color: #64748b; }
+.response-success { color: #15803d; font-weight: 700; }
+.response-failure { color: #b91c1c; font-weight: 700; }
+.api-tester-saved ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.api-tester-saved li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+}
+.api-tester-saved li > div:first-child { display: grid; gap: 4px; min-width: 0; }
+.api-tester-saved small { overflow-wrap: anywhere; color: #64748b; }
+.api-tester-saved-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+@media (max-width: 680px) {
+  .api-tester-request-line,
+  .api-tester-save-line,
+  .api-tester-saved li { align-items: stretch; flex-direction: column; }
+  .api-tester-request-line > label:first-child { width: 100%; }
+  .api-tester-response-heading small { margin-left: 0; }
+  .api-tester-saved-actions { justify-content: flex-start; }
+}

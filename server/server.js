@@ -1,28 +1,31 @@
 
-const express = require('express')
-const cors = require('cors')
 require('dotenv').config()
 
-const app = express()
-const PORT = process.env.PORT || 5000
+const { getConfig } = require('./config/env')
+const { connectDatabase, disconnectDatabase } = require('./config/database')
+const { createApp } = require('./app')
 
-app.use(cors())
-app.use(express.json())
+async function startServer() {
+  const config = getConfig()
+  await connectDatabase(config.mongoUri)
 
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'DevFlow AI backend is running!'
+  const app = createApp()
+  const server = app.listen(config.port, () => {
+    console.log(`DevFlow AI server running on port ${config.port}`)
   })
-})
 
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    status: 'healthy'
+  return server
+}
+
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error(`Unable to start DevFlow AI: ${error.message}`)
+    disconnectDatabase()
+      .catch(() => {})
+      .finally(() => {
+        process.exitCode = 1
+      })
   })
-})
+}
 
-app.listen(PORT, () => {
-  console.log(`DevFlow AI server running on port ${PORT}`)
-})
+module.exports = { startServer }

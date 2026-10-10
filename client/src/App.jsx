@@ -4,6 +4,7 @@ import AuthPage from './AuthPage.jsx'
 import { AuthProvider, useAuth } from './auth/AuthContext.jsx'
 import ProjectsPage from './ProjectsPage.jsx'
 import './ProjectsPage.css'
+import AdminUsersPage from './AdminUsersPage.jsx'
 
 function Workspace() {
   const { user, loading, logout } = useAuth()
@@ -52,6 +53,7 @@ function Workspace() {
           <a href="#api">API Tester</a>
           <a href="#review">AI Code Review</a>
           {user.role === 'admin' && <a href="#team">Team Management</a>}
+          {user.role === 'admin' && <a href="#admin-users" onClick={(event) => navigate(event, 'admin-users')}>Admin Users</a>}
         </nav>
 
         <div className="user-info">
@@ -60,7 +62,7 @@ function Workspace() {
         </div>
       </aside>
 
-      {activePage === 'projects' ? <ProjectsPage /> : (
+      {activePage === 'projects' ? <ProjectsPage /> : activePage === 'admin-users' && user.role === 'admin' ? <AdminUsersPage /> : (
         <main className="main-content">
           <header className="topbar">
             <div>

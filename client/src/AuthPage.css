@@ -1,0 +1,31 @@
+.auth-welcome {
+  box-sizing: border-box;
+  width: min(100%, 620px);
+  margin: 32px auto;
+}
+
+.auth-form {
+  margin: 24px 0 0;
+  text-align: left;
+}
+
+.auth-form small {
+  display: block;
+  margin-top: 6px;
+  opacity: 0.75;
+}
+
+.auth-switch {
+  margin-top: 20px;
+}
+
+.auth-link {
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}

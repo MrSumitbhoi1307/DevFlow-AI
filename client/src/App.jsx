@@ -1,7 +1,27 @@
 
 import './App.css'
+import { AuthProvider, useAuth } from './auth/AuthContext.jsx'
+import AuthPage from './AuthPage.jsx'
 
-function App() {
+function Workspace() {
+  const { user, loading, logout } = useAuth()
+
+  if (loading) {
+    return <main className="main-content"><p role="status">Checking your session...</p></main>
+  }
+
+  if (!user) {
+    return (
+      <div className="app">
+        <aside className="sidebar">
+          <h2>DevFlow <span>AI</span></h2>
+          <p>DEVELOPER WORKSPACE</p>
+        </aside>
+        <AuthPage />
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -14,12 +34,12 @@ function App() {
           <a href="#issues">Issues</a>
           <a href="#api">API Tester</a>
           <a href="#review">AI Code Review</a>
-          <a href="#team">Team Management</a>
+          {user.role === 'admin' && <a href="#team">Team Management</a>}
         </nav>
 
         <div className="user-info">
-          <strong>Developer</strong>
-          <small>Workspace Member</small>
+          <strong>{user.name}</strong>
+          <small>{user.role === 'admin' ? 'Administrator' : 'Developer'}</small>
         </div>
       </aside>
 
@@ -29,9 +49,7 @@ function App() {
             <h1>Developer Dashboard</h1>
             <p>Welcome to your development workspace.</p>
           </div>
-          <button onClick={() => alert('Login feature will be added next.')}>
-            Login
-          </button>
+          <button type="button" onClick={logout}>Logout</button>
         </header>
 
         <section className="stats">
@@ -78,14 +96,20 @@ function App() {
             <h3>AI Code Review</h3>
             <p>Review code and identify possible improvements.</p>
           </article>
-          <article className="tool-card">
-            <h3>Team Management</h3>
-            <p>Manage developer and admin permissions.</p>
-          </article>
+          {user.role === 'admin' && (
+            <article className="tool-card">
+              <h3>Team Management</h3>
+              <p>Manage developer and admin permissions.</p>
+            </article>
+          )}
         </section>
       </main>
     </div>
   )
+}
+
+function App() {
+  return <AuthProvider><Workspace /></AuthProvider>
 }
 
 export default App

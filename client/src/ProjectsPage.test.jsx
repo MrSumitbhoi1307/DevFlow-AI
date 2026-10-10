@@ -13,6 +13,16 @@ function jsonResponse(body, status = 200) {
 
 const developer = { id: 'dev-1', name: 'Dev', email: 'dev@example.com', role: 'developer', status: 'active' }
 
+function mockProjectRequests({ projects = [], createResponse } = {}) {
+  fetch.mockImplementation(async (url, options = {}) => {
+    if (url.endsWith('/api/auth/me')) return jsonResponse({ success: true, user: developer })
+    if (url.endsWith('/api/dashboard/summary')) return jsonResponse({ success: true, summary: { totalProjects: projects.length, openIssues: 0 } })
+    if (url.endsWith('/api/projects') && (!options.method || options.method === 'GET')) return jsonResponse({ success: true, projects })
+    if (url.endsWith('/api/projects') && options.method === 'POST') return createResponse
+    return jsonResponse({ success: false, error: 'Unexpected request' }, 404)
+  })
+}
+
 describe('Projects page inside the authenticated app', () => {
   beforeEach(() => {
     sessionStorage.setItem('devflow.token', 'test-token')
@@ -26,11 +36,7 @@ describe('Projects page inside the authenticated app', () => {
   })
 
   it('loads persisted projects with the shared session token', async () => {
-    fetch.mockResolvedValueOnce(jsonResponse({ success: true, user: developer }))
-      .mockResolvedValueOnce(jsonResponse({
-        success: true,
-        projects: [{ _id: 'p1', name: 'Existing app', description: 'Stored project', status: 'active', owner: { name: 'Dev' } }],
-      }))
+    mockProjectRequests({ projects: [{ _id: 'p1', name: 'Existing app', description: 'Stored project', status: 'active', owner: { name: 'Dev' } }] })
 
     render(<App />)
     await screen.findByText('Dev')
@@ -44,12 +50,10 @@ describe('Projects page inside the authenticated app', () => {
   })
 
   it('creates a project and renders the returned persisted record', async () => {
-    fetch.mockResolvedValueOnce(jsonResponse({ success: true, user: developer }))
-      .mockResolvedValueOnce(jsonResponse({ success: true, projects: [] }))
-      .mockResolvedValueOnce(jsonResponse({
-        success: true,
-        project: { _id: 'p2', name: 'New project', description: 'Created from the form', status: 'active' },
-      }, 201))
+    mockProjectRequests({ createResponse: jsonResponse({
+      success: true,
+      project: { _id: 'p2', name: 'New project', description: 'Created from the form', status: 'active' },
+    }, 201) })
 
     render(<App />)
     await screen.findByText('Dev')

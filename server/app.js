@@ -6,6 +6,8 @@ const { getConfig } = require('./config/env')
 const { createAuthRouter } = require('./routes/auth')
 const { createAdminRouter } = require('./routes/admin')
 const { createProjectsRouter } = require('./routes/projects')
+const { createIssuesRouter } = require('./routes/issues')
+const { createDashboardRouter } = require('./routes/dashboard')
 
 function createApp(config = getConfig()) {
   const app = express()
@@ -18,6 +20,8 @@ function createApp(config = getConfig()) {
   app.use('/api/auth', createAuthRouter({ jwtSecret: config.jwtSecret }))
   app.use('/api/admin', createAdminRouter({ jwtSecret: config.jwtSecret }))
   app.use('/api/projects', createProjectsRouter({ jwtSecret: config.jwtSecret }))
+  app.use('/api/issues', createIssuesRouter({ jwtSecret: config.jwtSecret }))
+  app.use('/api/dashboard', createDashboardRouter({ jwtSecret: config.jwtSecret }))
 
   app.get('/', (req, res) => {
     res.json({

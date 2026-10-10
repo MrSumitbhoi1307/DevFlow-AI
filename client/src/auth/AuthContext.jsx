@@ -13,6 +13,9 @@ async function sendRequest(path, { authToken, method = 'GET', body, onUnauthoriz
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
   })
+  if (!response || typeof response.json !== 'function') {
+    throw new Error('The server did not return a valid response')
+  }
   const payload = await response.json().catch(() => ({}))
   if (response.status === 401) onUnauthorized?.()
   if (!response.ok) throw new Error(payload.error || 'The request could not be completed')

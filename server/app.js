@@ -17,7 +17,24 @@ function createApp(config = getConfig(), apiTesterDependencies = {}, codeReviewD
 
   app.disable('x-powered-by')
   app.use(helmet())
-  app.use(cors({ origin: config.clientOrigin, credentials: true }))
+  const allowedOrigins = [
+  config.clientOrigin,
+  'http://localhost:5173',
+  'https://dev-flow-ai-pi.vercel.app',
+].filter(Boolean)
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+
+      return callback(new Error('Origin not allowed by CORS'))
+    },
+    credentials: true,
+  })
+)
   app.use((req, res, next) => {
     const limit = req.path.startsWith('/api/api-tester/') ? '768kb'
       : req.path === '/api/code-review' ? '64kb' : '16kb'
